@@ -33,7 +33,7 @@ const AddUserModal = ({ addUser }) => {
                 break;
             case "email":
                 if (!value.match(emailRegex)) {
-                    error = "Email is not valid email address";
+                    error = "Please enter a valid email address";
                 }
                 break;
             case "phone":
@@ -44,7 +44,7 @@ const AddUserModal = ({ addUser }) => {
             case "website":
                 if (!value.match(urlRegex)) {
                     error =
-                        "Website is not valid url (eg. https://website.com)";
+                        "Invalid website URL (e.g., https://example.com)";
                 }
                 break;
         }
@@ -57,7 +57,7 @@ const AddUserModal = ({ addUser }) => {
 
     return (
         <div id="addUserModal" className="modal fade" tabIndex="-1">
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title">Add a new User</h5>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import AddUserModal from "../AddUserModal/AddUserModal";
+import DeleteUserModal from "./../DeleteUserModal/DeleteUserModal";
 
 const API_BASE = "https://jsonplaceholder.typicode.com";
 
@@ -10,6 +11,8 @@ const cleanPhone = (phone) => phone.replace(/[^0-9]/g, "").substring(0, 10);
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedUserId, setSelectedUserId] = useState(null);
+    const selectedUser = users.find((user) => user.id === selectedUserId);
 
     const fetchUsers = async () => {
         try {
@@ -41,6 +44,22 @@ const UserManagement = () => {
                 return "User added successfully";
             },
             error: "An error occurred while adding user",
+        });
+    };
+
+    const deleteUser = () => {
+        const deletedUserId = selectedUserId;
+        const promise = fetch(`${API_BASE}/users/${deletedUserId}`, {
+            method: "DELETE",
+        });
+
+        toast.promise(promise, {
+            loading: "Deleting user...",
+            success: (data) => {
+                setUsers(users.filter((user) => user.id !== deletedUserId));
+                return "User deleted successfully";
+            },
+            error: "An error occurred while deleting user",
         });
     };
 
@@ -128,7 +147,7 @@ const UserManagement = () => {
                                                 </a>
                                             </td>
                                             <td>
-                                                {/* <a
+                                                <a
                                                     type="button"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#confirmDeleteModal"
@@ -156,7 +175,7 @@ const UserManagement = () => {
                                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                                         />
                                                     </svg>
-                                                </a> */}
+                                                </a>
                                             </td>
                                         </tr>
                                     );
@@ -166,9 +185,14 @@ const UserManagement = () => {
                     </div>
                 </div>
             )}
-            <AddUserModal addUser={addUser} />
-        </div>
-    )
-}
 
-export default UserManagement
+            <AddUserModal addUser={addUser} />
+            <DeleteUserModal
+                deleteUser={deleteUser}
+                selectedUser={selectedUser}
+            />
+        </div>
+    );
+};
+
+export default UserManagement;
