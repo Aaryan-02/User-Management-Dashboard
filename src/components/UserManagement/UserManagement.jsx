@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import AddUserModal from "../AddUserModal/AddUserModal";
 
 const API_BASE = "https://jsonplaceholder.typicode.com";
+
+// Cleans the phone number to only contain numbers and be 10 digits
+const cleanPhone = (phone) => phone.replace(/[^0-9]/g, "").substring(0, 10);
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -18,6 +23,27 @@ const UserManagement = () => {
         }
     };
 
+    const addUser = (values) => {
+        const promise = fetch(API_BASE + "/users", {
+            method: "POST",
+            body: JSON.stringify(values),
+            headers: {
+                "Content-Type": "application/json; charset=UTF-8",
+            },
+        });
+        toast.promise(promise, {
+            loading: "Adding user...",
+            success: (data) => {
+                (async () => {
+                    data = await data.json();
+                    setUsers((prev) => [...prev, data]);
+                })();
+                return "User added successfully";
+            },
+            error: "An error occurred while adding user",
+        });
+    };
+
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -28,7 +54,7 @@ const UserManagement = () => {
             {!loading && (
                 <div className="row g-4">
                     {/* Left column */}
-                    {/* <div className="col col-md-2">
+                    <div className="col col-md-2">
                         <button
                             type="button"
                             className="btn btn-primary ms-auto d-md-block"
@@ -37,7 +63,7 @@ const UserManagement = () => {
                         >
                             Add User
                         </button>
-                    </div> */}
+                    </div>
                     {/* Right Column */}
                     <div className="col col-md-10">
                         <h2>Users List</h2>
@@ -78,12 +104,12 @@ const UserManagement = () => {
                                             <td>
                                                 <a
                                                     className="text-reset"
-                                                    // href={`tel:${cleanPhone(
-                                                    //     user.phone
-                                                    // )}`}
+                                                    href={`tel:${cleanPhone(
+                                                        user.phone
+                                                    )}`}
                                                     target="_blank"
                                                 >
-                                                    {/* {cleanPhone(user.phone)} */}
+                                                    {cleanPhone(user.phone)}
                                                 </a>
                                             </td>
                                             <td>
@@ -140,6 +166,7 @@ const UserManagement = () => {
                     </div>
                 </div>
             )}
+            <AddUserModal addUser={addUser} />
         </div>
     )
 }
