@@ -1,9 +1,10 @@
 import React from 'react';
+import Navbar from "./components/Navbar/Navbar";
 
 function App() {
   return (
-    <div className="container mt-5">
-      <h1 className="text-primary">User Management Dashboard</h1>
+    <div className="bg-white h-100 d-flex flex-column">
+      <Navbar />
     </div>
   );
 }
