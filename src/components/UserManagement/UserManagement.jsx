@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import AddUserModal from "../AddUserModal/AddUserModal";
+import EditUserModal from "../EditUserModal/EditUserModal";
 import DeleteUserModal from "./../DeleteUserModal/DeleteUserModal";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import { FaUserEdit } from "react-icons/fa";
 
 const API_BASE = "https://jsonplaceholder.typicode.com";
 
@@ -12,7 +15,12 @@ const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedUserId, setSelectedUserId] = useState(null);
+
     const selectedUser = users.find((user) => user.id === selectedUserId);
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
 
     const fetchUsers = async () => {
         try {
@@ -47,6 +55,28 @@ const UserManagement = () => {
         });
     };
 
+    const updateUser = (updatedUser) => {
+        const promise = fetch(`${API_BASE}/users/${updatedUser.id}`, {
+            method: "PUT",
+            body: JSON.stringify(updatedUser),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        toast.promise(promise, {
+            loading: "Updating user...",
+            success: (response) => {
+                (async () => {
+                    const data = await response.json();
+                    setUsers(users.map((user) => (user.id === data.id ? data : user)));
+                })();
+                return "User updated successfully";
+            },
+            error: "An error occurred while updating the user",
+        });
+    };
+
     const deleteUser = () => {
         const deletedUserId = selectedUserId;
         const promise = fetch(`${API_BASE}/users/${deletedUserId}`, {
@@ -62,10 +92,6 @@ const UserManagement = () => {
             error: "An error occurred while deleting user",
         });
     };
-
-    useEffect(() => {
-        fetchUsers();
-    }, []);
 
     return (
         <div className="container">
@@ -146,7 +172,7 @@ const UserManagement = () => {
                                                     {user.website}
                                                 </a>
                                             </td>
-                                            <td>
+                                            <td className="d-flex justify-content-around align-items-center">
                                                 <a
                                                     type="button"
                                                     data-bs-toggle="modal"
@@ -157,25 +183,17 @@ const UserManagement = () => {
                                                         )
                                                     }
                                                 >
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        style={{
-                                                            width: "24px",
-                                                            height: "24px",
-                                                        }}
-                                                        className="text-danger"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        strokeWidth={2}
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                        />
-                                                    </svg>
+                                                    <RiDeleteBin5Line size={22} color="red" />
                                                 </a>
+                                                <a
+                                                    type="button"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editUserModal"
+                                                    onClick={() => setSelectedUserId(user.id)}
+                                                >
+                                                    <FaUserEdit size={22} />
+                                                </a>
+
                                             </td>
                                         </tr>
                                     );
@@ -187,6 +205,9 @@ const UserManagement = () => {
             )}
 
             <AddUserModal addUser={addUser} />
+
+            <EditUserModal selectedUser={selectedUser} updateUser={updateUser} />
+
             <DeleteUserModal
                 deleteUser={deleteUser}
                 selectedUser={selectedUser}
