@@ -53,9 +53,13 @@ const UserManagement = () => {
             success: (data) => {
                 (async () => {
                     data = await data.json();
-                    setUsers((prev) => [data, ...prev]); // Add new user at the beginning
-                    setCurrentPage(1);
-                    // setUsers((prev) => [...prev, data]);
+                    setUsers((prev) => {
+                        const updatedUsers = [...prev, data];
+                        // Reset pagination after adding the new user
+                        const newTotalPages = Math.ceil(updatedUsers.length / USERS_PER_PAGE);
+                        setCurrentPage(newTotalPages > currentPage ? currentPage : newTotalPages);
+                        return updatedUsers;
+                    });
                 })();
                 return "User added successfully";
             },
@@ -205,6 +209,9 @@ const UserManagement = () => {
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editUserModal"
                                                     onClick={() => setSelectedUserId(user.id)}
+                                                    // Disable the edit button for newly added users (id > 10)
+                                                    className={user.id > 10 ? "disabled" : ""}
+                                                    style={user.id > 10 ? { pointerEvents: "none", opacity: 0.5 } : {}}
                                                 >
                                                     <FaUserEdit size={22} />
                                                 </a>
