@@ -12,6 +12,7 @@ const EditUserModal = ({ selectedUser, updateUser }) => {
         const { name, value } = e.target;
         let error = "";
 
+        // Input validation logic
         switch (name) {
             case "name":
                 if (!value.trim()) error = "Name is required";

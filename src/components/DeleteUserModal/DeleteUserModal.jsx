@@ -1,3 +1,5 @@
+import React from "react";
+
 const DeleteUserModal = ({ selectedUser, deleteUser }) => {
     return (
         <div id="confirmDeleteModal" className="modal fade" tabIndex="-1">

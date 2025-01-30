@@ -7,6 +7,8 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { FaUserEdit } from "react-icons/fa";
 
 const API_BASE = "https://jsonplaceholder.typicode.com";
+// Maximum 10 users allowed per page
+const USERS_PER_PAGE = 10;
 
 // Cleans the phone number to only contain numbers and be 10 digits
 const cleanPhone = (phone) => phone.replace(/[^0-9]/g, "").substring(0, 10);
@@ -15,13 +17,16 @@ const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedUserId, setSelectedUserId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
+    // Get selected user details
     const selectedUser = users.find((user) => user.id === selectedUserId);
 
     useEffect(() => {
         fetchUsers();
     }, []);
 
+    // Fetch users from API
     const fetchUsers = async () => {
         try {
             const response = await fetch(API_BASE + "/users");
@@ -34,6 +39,7 @@ const UserManagement = () => {
         }
     };
 
+    // Add a new user
     const addUser = (values) => {
         const promise = fetch(API_BASE + "/users", {
             method: "POST",
@@ -47,7 +53,9 @@ const UserManagement = () => {
             success: (data) => {
                 (async () => {
                     data = await data.json();
-                    setUsers((prev) => [...prev, data]);
+                    setUsers((prev) => [data, ...prev]); // Add new user at the beginning
+                    setCurrentPage(1);
+                    // setUsers((prev) => [...prev, data]);
                 })();
                 return "User added successfully";
             },
@@ -55,6 +63,7 @@ const UserManagement = () => {
         });
     };
 
+    // Update existing user
     const updateUser = (updatedUser) => {
         const promise = fetch(`${API_BASE}/users/${updatedUser.id}`, {
             method: "PUT",
@@ -77,6 +86,7 @@ const UserManagement = () => {
         });
     };
 
+    // Delete user from list
     const deleteUser = () => {
         const deletedUserId = selectedUserId;
         const promise = fetch(`${API_BASE}/users/${deletedUserId}`, {
@@ -93,12 +103,17 @@ const UserManagement = () => {
         });
     };
 
+    // Calculate pagination indices
+    const indexOfLastUser = currentPage * USERS_PER_PAGE;
+    const indexOfFirstUser = indexOfLastUser - USERS_PER_PAGE;
+    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
+
     return (
         <div className="container">
             {loading && <p>Loading users...</p>}
             {!loading && (
                 <div className="row g-4">
-                    {/* Left column */}
                     <div className="col col-md-2">
                         <button
                             type="button"
@@ -109,7 +124,7 @@ const UserManagement = () => {
                             Add User
                         </button>
                     </div>
-                    {/* Right Column */}
+                    {/* Users List */}
                     <div className="col col-md-10">
                         <h2>Users List</h2>
                         {users.length == 0 && <p>No users available</p>}
@@ -125,7 +140,7 @@ const UserManagement = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.map((user) => {
+                                {currentUsers.map((user) => {
                                     return (
                                         <tr
                                             key={
@@ -200,10 +215,29 @@ const UserManagement = () => {
                                 })}
                             </tbody>
                         </table>
+                        {/* Pagination controls */}
+                        {users.length > USERS_PER_PAGE && (
+                            <nav aria-label="User pagination">
+                                <ul className="pagination">
+                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <button className="page-link" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>Previous</button>
+                                    </li>
+                                    {Array.from({ length: totalPages }, (_, index) => (
+                                        <li key={index + 1} className={`page-item ${currentPage === index + 1 ? "active" : ""}`}>
+                                            <button className="page-link" onClick={() => setCurrentPage(index + 1)}>{index + 1}</button>
+                                        </li>
+                                    ))}
+                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                        <button className="page-link" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>Next</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        )}
                     </div>
                 </div>
             )}
 
+            {/* User Modals */}
             <AddUserModal addUser={addUser} />
 
             <EditUserModal selectedUser={selectedUser} updateUser={updateUser} />

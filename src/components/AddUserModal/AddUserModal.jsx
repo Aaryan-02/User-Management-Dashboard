@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+// Default form values
 const defaultValues = {
     name: "",
     username: "",
@@ -20,6 +21,8 @@ const AddUserModal = ({ addUser }) => {
         const name = e.target.name;
         const value = e.target.value;
         let error = "";
+
+        // Input validation logic
         switch (name) {
             case "name":
                 if (value.length < 1) {
