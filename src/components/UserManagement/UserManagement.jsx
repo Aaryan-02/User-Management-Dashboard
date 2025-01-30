@@ -54,7 +54,7 @@ const UserManagement = () => {
                 (async () => {
                     data = await data.json();
                     setUsers((prev) => {
-                        const updatedUsers = [...prev, data];
+                        const updatedUsers = [data, ...prev];
                         // Reset pagination after adding the new user
                         const newTotalPages = Math.ceil(updatedUsers.length / USERS_PER_PAGE);
                         setCurrentPage(newTotalPages > currentPage ? currentPage : newTotalPages);
@@ -101,6 +101,7 @@ const UserManagement = () => {
             loading: "Deleting user...",
             success: (data) => {
                 setUsers(users.filter((user) => user.id !== deletedUserId));
+                setCurrentPage(1);
                 return "User deleted successfully";
             },
             error: "An error occurred while deleting user",
